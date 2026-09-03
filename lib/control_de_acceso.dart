@@ -1,6 +1,8 @@
-
 import 'package:flutter/material.dart';
+
 import 'home.dart';
+import 'models/access_record.dart';
+import 'services/access_log_service.dart';
 
 class BodyApp extends StatefulWidget {
   const BodyApp({super.key});
@@ -12,30 +14,76 @@ class BodyApp extends StatefulWidget {
 class _BodyAppState extends State<BodyApp> {
   final _formKey = GlobalKey<FormState>();
 
+  final usuarioController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  final logService = AccessLogService();
+
   bool recordarme = false;
+
+  String mensaje = '';
+
+  void validarAcceso() {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    final usuario = usuarioController.text.trim();
+    final password = passwordController.text;
+
+    final exitoso =
+    usuario == 'admin@gmail.com' && password == '123456';
+
+    logService.add(
+      AccessRecord(
+        usuario: usuario,
+        fechaHora: DateTime.now(),
+        exitoso: exitoso,
+      ),
+    );
+
+    setState(() {
+      mensaje = exitoso
+          ? 'Acceso autorizado'
+          : 'Usuario o contraseña incorrectos';
+    });
+
+    if (exitoso) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomePage(
+            logService: logService,
+          ),
+        ),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    usuarioController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 190, 146, 146),
-
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(
             maxWidth: 500,
           ),
-
           child: Card(
             child: Padding(
               padding: const EdgeInsets.all(25),
-
               child: Form(
                 key: _formKey,
-
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-
                     const Text(
                       'FrutiApp',
                       style: TextStyle(
@@ -59,11 +107,11 @@ class _BodyAppState extends State<BodyApp> {
                     const SizedBox(height: 8),
 
                     TextFormField(
+                      controller: usuarioController,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         hintText: 'Ingrese su correo',
                       ),
-
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Ingrese el correo';
@@ -93,13 +141,12 @@ class _BodyAppState extends State<BodyApp> {
                     const SizedBox(height: 8),
 
                     TextFormField(
+                      controller: passwordController,
                       obscureText: true,
-
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         hintText: 'Ingrese su contraseña',
                       ),
-
                       validator: (value) {
                         if (value == null || value.length < 6) {
                           return 'La contraseña debe tener al menos 6 caracteres';
@@ -113,14 +160,12 @@ class _BodyAppState extends State<BodyApp> {
                       children: [
                         Checkbox(
                           value: recordarme,
-
                           onChanged: (value) {
                             setState(() {
                               recordarme = value ?? false;
                             });
                           },
                         ),
-
                         const Text('Recordarme'),
                       ],
                     ),
@@ -129,22 +174,24 @@ class _BodyAppState extends State<BodyApp> {
 
                     SizedBox(
                       width: double.infinity,
-
                       child: ElevatedButton(
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const HomePage(),
-                              ),
-                            );
-                          }
-                        },
-
+                        onPressed: validarAcceso,
                         child: const Text('Ingresar'),
                       ),
                     ),
+
+                    if (mensaje.isNotEmpty) ...[
+                      const SizedBox(height: 15),
+                      Text(
+                        mensaje,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: mensaje == 'Acceso autorizado'
+                              ? Colors.green
+                              : Colors.red,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -155,4 +202,3 @@ class _BodyAppState extends State<BodyApp> {
     );
   }
 }
-
