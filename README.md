@@ -2,61 +2,57 @@
 
 Proyecto desarrollado con Flutter Web para la Semana 4 del curso IF0009 - Desarrollo de Software IV.
 
-## Persistencia de datos con JSON
+## Descripción
 
-En esta práctica se implementó el manejo de información estructurada mediante archivos JSON.
+FrutiApp Web implementa un sistema de control de acceso con validación de usuario y contraseña, persistencia del usuario mediante SharedPreferences y una bitácora de intentos de acceso.
 
-### Funcionalidades implementadas
+La aplicación permite registrar los accesos autorizados y rechazados, visualizar la bitácora y trabajar con archivos JSON mediante importación y exportación.
 
-- Creación del modelo `AccessRecord`.
-- Conversión de objetos Dart a JSON mediante `toJson()`.
-- Reconstrucción de objetos Dart desde JSON mediante `fromJson()`.
-- Importación de archivos JSON desde Flutter Web.
-- Exportación y descarga de archivos JSON desde Flutter Web.
-- Manejo de archivos JSON vacíos o con formato inválido.
-- Pruebas con archivos JSON válidos, vacíos e inválidos.
+## Funcionalidades implementadas
 
-## Dependencias utilizadas
+### Control de acceso
 
-- `file_selector`
-- `web`
+- Campo de correo electrónico con validación obligatoria.
+- Campo de contraseña con validación.
+- Opción para mostrar u ocultar la contraseña.
+- Opción "Recordarme".
+- Validación de credenciales.
+- Mensaje para acceso autorizado o rechazado.
+- Navegación al catálogo después de un acceso autorizado.
 
-Además, se utilizó `dart:convert` para trabajar con JSON.
+### Persistencia con SharedPreferences
 
-## Pruebas realizadas
+- Guarda únicamente el usuario cuando se selecciona "Recordarme".
+- Recupera automáticamente el usuario al volver a abrir o recargar la aplicación.
+- Elimina el usuario guardado cuando "Recordarme" se desactiva.
+- La contraseña nunca se almacena.
 
-### JSON válido
+### Bitácora de accesos
 
-Se importó un archivo JSON con dos registros:
+Cada intento de acceso registra:
 
-- Usuario: ana — Acceso exitoso.
-- Usuario: luis — Acceso fallido.
+- Usuario.
+- Fecha y hora.
+- Resultado: `AUTORIZADO` o `RECHAZADO`.
 
-### JSON vacío
+La información se muestra mediante una lista de registros en la aplicación.
 
-Se probó un archivo JSON vacío y la aplicación mostró un mensaje indicando que el archivo no tenía un formato válido.
+### Importación y exportación JSON
 
-### JSON inválido
+- Exportación de la bitácora a un archivo JSON.
+- Descarga del archivo desde Flutter Web.
+- Importación de archivos JSON.
+- Validación de la estructura del archivo.
+- Manejo de archivos JSON inválidos sin cerrar la aplicación.
 
-Se probó un archivo con contenido que no correspondía a un JSON válido y la aplicación mostró un mensaje de error.
+## Estructura principal
 
-### Exportación
-
-Se exportaron los registros mediante Flutter Web y se descargó el archivo:
-
-`bitacora_accesos.json`
-
-## Git y GitHub
-
-El proyecto fue versionado utilizando Git y posteriormente se creó y conectó un repositorio en GitHub.
-
-Se realizaron commits para guardar los avances del proyecto y finalmente se realizó el `push` de la rama `main` al repositorio remoto.
-
-## Tecnologías
-
-- Flutter
-- Dart
-- Flutter Web
-- JSON
-- Git
-- GitHub
+```text
+lib/
+├── models/
+│   └── access_record.dart
+├── services/
+│   ├── access_log_service.dart
+│   └── preferences_service.dart
+├── control_de_acceso.dart
+└── home.dart
