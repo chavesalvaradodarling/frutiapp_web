@@ -122,7 +122,6 @@ class _HomePageState extends State<HomePage> {
         'data:application/json;base64,$base64Data';
 
     anchor.download = 'bitacora_accesos.json';
-
     anchor.click();
   }
 
@@ -158,6 +157,9 @@ class _HomePageState extends State<HomePage> {
       itemBuilder: (context, index) {
         final registro = registros[index];
 
+        final autorizado =
+            registro.resultado == 'AUTORIZADO';
+
         return Card(
           margin: const EdgeInsets.symmetric(
             horizontal: 16,
@@ -165,10 +167,10 @@ class _HomePageState extends State<HomePage> {
           ),
           child: ListTile(
             leading: Icon(
-              registro.exitoso
+              autorizado
                   ? Icons.check_circle
                   : Icons.cancel,
-              color: registro.exitoso
+              color: autorizado
                   ? Colors.green
                   : Colors.red,
             ),
@@ -180,7 +182,7 @@ class _HomePageState extends State<HomePage> {
             ),
             subtitle: Text(
               'Fecha y hora: ${registro.fechaHora}\n'
-              'Resultado: ${registro.exitoso ? 'OK' : 'FALLÓ'}',
+              'Resultado: ${registro.resultado}',
             ),
           ),
         );
@@ -192,17 +194,15 @@ class _HomePageState extends State<HomePage> {
   // INTERFAZ
   // =========================
 
-
   @override
-Widget build(BuildContext context) {
-  return Scaffold(
+  Widget build(BuildContext context) {
+    return Scaffold(
       appBar: AppBar(
         title: const Text(
           'FrutiApp - Catálogo',
         ),
         centerTitle: true,
       ),
-
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -222,9 +222,7 @@ Widget build(BuildContext context) {
                     'Exportar JSON',
                   ),
                 ),
-
                 const SizedBox(width: 10),
-
                 OutlinedButton.icon(
                   onPressed: importarBitacora,
                   icon: const Icon(Icons.upload_file),
@@ -344,8 +342,10 @@ Widget build(BuildContext context) {
                         listaProductos[index];
 
                     final int id = producto['id'];
+
                     final String nombre =
                         producto['title'];
+
                     final int precio = id * 100;
 
                     return Card(

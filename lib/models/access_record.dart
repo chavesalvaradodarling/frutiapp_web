@@ -1,25 +1,27 @@
 class AccessRecord {
   final String usuario;
   final DateTime fechaHora;
-  final bool exitoso;
+  final String resultado;
 
   const AccessRecord({
     required this.usuario,
     required this.fechaHora,
-    required this.exitoso,
+    required this.resultado,
   });
 
-  Map<String, dynamic> toJson() => {
-    'usuario': usuario,
-    'fechaHora': fechaHora.toIso8601String(),
-    'exitoso': exitoso,
-  };
+  Map<String, dynamic> toJson() {
+    return {
+      'usuario': usuario,
+      'fechaHora': fechaHora.toIso8601String(),
+      'resultado': resultado,
+    };
+  }
 
   factory AccessRecord.fromJson(Map<String, dynamic> json) {
     return AccessRecord(
       usuario: json['usuario'] as String,
       fechaHora: DateTime.parse(json['fechaHora'] as String),
-      exitoso: json['exitoso'] as bool,
+      resultado: json['resultado'] as String,
     );
   }
 }

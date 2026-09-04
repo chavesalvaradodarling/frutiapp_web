@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "frutiapp_web (Chrome - puerto fijo)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "chrome",
+      "args": [
+        "--web-port=8080",
+        "--web-browser-flag=--disable-web-security"
+      ]
+    }
+  ]
+}

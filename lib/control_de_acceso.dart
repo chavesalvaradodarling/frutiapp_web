@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'home.dart';
 import 'models/access_record.dart';
 import 'services/access_log_service.dart';
+import 'services/preferences_service.dart';
 
 class BodyApp extends StatefulWidget {
   const BodyApp({super.key});
@@ -18,12 +19,34 @@ class _BodyAppState extends State<BodyApp> {
   final passwordController = TextEditingController();
 
   final logService = AccessLogService();
+  final preferencesService = PreferencesService();
 
   bool recordarme = false;
+  bool mostrarPassword = false;
 
   String mensaje = '';
 
-  void validarAcceso() {
+  @override
+  void initState() {
+    super.initState();
+    cargarUsuarioRecordado();
+  }
+
+  // Carga el usuario guardado anteriormente.
+  Future<void> cargarUsuarioRecordado() async {
+    final usuario = await preferencesService.obtenerUsuarioRecordado();
+
+    if (!mounted) return;
+
+    if (usuario != null) {
+      setState(() {
+        usuarioController.text = usuario;
+        recordarme = true;
+      });
+    }
+  }
+
+  Future<void> validarAcceso() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -32,15 +55,28 @@ class _BodyAppState extends State<BodyApp> {
     final password = passwordController.text;
 
     final exitoso =
-    usuario == 'admin@gmail.com' && password == '123456';
+        usuario == 'admin@gmail.com' && password == '123456';
 
+    // Determinar el resultado del intento.
+    final resultado = exitoso ? 'AUTORIZADO' : 'RECHAZADO';
+
+    // Registrar el intento de acceso.
     logService.add(
       AccessRecord(
         usuario: usuario,
         fechaHora: DateTime.now(),
-        exitoso: exitoso,
+        resultado: resultado,
       ),
     );
+
+    // Guardar o eliminar el usuario recordado.
+    if (recordarme) {
+      await preferencesService.guardarUsuario(usuario);
+    } else {
+      await preferencesService.eliminarUsuarioRecordado();
+    }
+
+    if (!mounted) return;
 
     setState(() {
       mensaje = exitoso
@@ -142,10 +178,22 @@ class _BodyAppState extends State<BodyApp> {
 
                     TextFormField(
                       controller: passwordController,
-                      obscureText: true,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
+                      obscureText: !mostrarPassword,
+                      decoration: InputDecoration(
+                        border: const OutlineInputBorder(),
                         hintText: 'Ingrese su contraseña',
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            mostrarPassword
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              mostrarPassword = !mostrarPassword;
+                            });
+                          },
+                        ),
                       ),
                       validator: (value) {
                         if (value == null || value.length < 6) {
@@ -160,10 +208,19 @@ class _BodyAppState extends State<BodyApp> {
                       children: [
                         Checkbox(
                           value: recordarme,
-                          onChanged: (value) {
+                          onChanged: (value) async {
+                            final nuevoValor = value ?? false;
+
                             setState(() {
-                              recordarme = value ?? false;
+                              recordarme = nuevoValor;
                             });
+
+                            // Si se desactiva Recordarme,
+                            // se elimina el usuario guardado.
+                            if (!nuevoValor) {
+                              await preferencesService
+                                  .eliminarUsuarioRecordado();
+                            }
                           },
                         ),
                         const Text('Recordarme'),
